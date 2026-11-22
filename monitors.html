@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Редактор и эмулятор мониторов Atlas HRP. Пресеты, TextMeshPro и команды Remote Admin.">
+  <title>Редактор мониторов | Atlas HRP</title>
+  <link rel="stylesheet" href="monitors.css">
+  <script defer src="monitor-core.js"></script>
+  <script defer src="monitors.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <a class="brand" href="index.html">ATLAS <span>HRP / ADMIN TOOLS</span></a>
+    <nav aria-label="Инструменты"><a href="index.html">Ключ-карты</a><a href="monitors.html" aria-current="page">Мониторы</a></nav>
+  </header>
+  <main>
+    <div class="intro"><h1>Редактор мониторов</h1><p>Создайте сообщение. Проверьте экран. Перенесите в игру.</p></div>
+    <section class="panel" aria-labelledby="editor-heading">
+      <div class="section-heading"><h2 id="editor-heading">Параметры монитора</h2><span class="badge">MONITORS</span></div>
+      <div class="editor-grid">
+        <div class="fields">
+          <label for="monitor-preset">Шаблон из плагина</label>
+          <select id="monitor-preset"><option value="">Свой монитор</option></select>
+          <label for="monitor-name">Имя пресета</label>
+          <input id="monitor-name" maxlength="120" value="Стандарт" placeholder="Например, Объявление">
+          <label for="monitor-title">Заголовок</label>
+          <textarea id="monitor-title" rows="2" maxlength="2000" spellcheck="false">SECURE. CONTAIN. PROTECT.</textarea>
+          <label for="monitor-content">Текст сообщения</label>
+          <textarea id="monitor-content" rows="5" maxlength="8000" spellcheck="false"><size=0.9>МЫ УМИРАЕМ ВО ТЬМЕ<br>ЧТОБЫ ВЫ МОГЛИ ЖИТЬ В СВЕТЕ</textarea>
+          <p class="hint">Перенос строки работает как &lt;br&gt;. Теги TextMeshPro сохраняются в командах и пресете.</p>
+        </div>
+        <aside class="settings">
+          <label for="monitor-hex">Цвет экрана</label>
+          <div class="color-row"><input type="color" id="monitor-color" value="#dce6e6" aria-label="Выбрать цвет экрана"><input id="monitor-hex" value="DCE6E6" maxlength="7" pattern="#?[0-9A-Fa-f]{6}" aria-describedby="color-help" spellcheck="false"></div>
+          <p id="color-help" class="hint">HEX из 6 символов. Например, FF4747.</p>
+          <label for="monitor-target">Применить в игре</label>
+          <select id="monitor-target"><option value="monitor">Ближайший монитор</option><option value="globalmonitor">Все мониторы</option></select>
+          <p class="hint">Для ближайшего монитора подойдите к нему в игре.</p>
+          <div class="tag-help"><h3>Форматирование</h3><p><code>&lt;br&gt;</code> — новая строка</p><p><code>&lt;b&gt;текст&lt;/b&gt;</code> — жирный</p><p><code>&lt;i&gt;текст&lt;/i&gt;</code> — курсив</p><p><code>&lt;size=0.9&gt;</code> — размер текста</p><p><code>&lt;color=#FF4747&gt;</code> — цвет текста</p><p class="hint">Также: u, s, mark, alpha, align, uppercase, lowercase, smallcaps, sub, sup. Прочие теги показаны как текст.</p></div>
+          <div class="button-row"><button id="save-draft" class="button secondary">Сохранить в браузере</button><button id="reset-monitor" class="button secondary">Сбросить</button></div>
+        </aside>
+      </div>
+    </section>
+    <section class="panel simulation-panel" aria-labelledby="simulation-heading">
+      <div class="section-heading"><h2 id="simulation-heading">Симуляция монитора</h2></div>
+      <div class="simulation-stage">
+        <div class="monitor-case">
+          <div id="monitor-screen" class="monitor-screen">
+            <svg class="scp-emblem" viewBox="0 0 260 260" role="img" aria-label="Эмблема SCP Foundation">
+              <path d="M96 8H164L171 32A110 110 0 0 1 238 151L237 160L255 178L220 234L194 225A109 109 0 0 1 66 225L40 234L5 178L23 160A110 110 0 0 1 89 32Z" fill="none" stroke="currentColor" stroke-width="8"/>
+              <circle cx="130" cy="135" r="70" fill="none" stroke="currentColor" stroke-width="13"/>
+              <defs><g id="scp-arrow"><path d="M130 49V104" fill="none" stroke="currentColor" stroke-width="12"/><path d="M113 101H147L130 130Z" fill="currentColor"/></g></defs>
+              <use href="#scp-arrow"/><use href="#scp-arrow" transform="rotate(120 130 135)"/><use href="#scp-arrow" transform="rotate(240 130 135)"/>
+            </svg>
+            <a class="screen-qr" href="monitors.html" aria-label="QR-код со ссылкой на редактор"><img src="monitor-qr.svg" alt="QR-код редактора мониторов"></a>
+            <div class="title-band"><div id="preview-title" class="preview-title"></div></div>
+            <div class="content-band"><div id="preview-content" class="preview-content"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="export-heading">
+      <div class="section-heading"><h2 id="export-heading">Перенести в игру</h2><span class="badge">REMOTE ADMIN</span></div>
+      <div class="export-grid"><div><label for="monitor-commands">Команды</label><textarea id="monitor-commands" rows="6" readonly spellcheck="false"></textarea><p class="hint">Выполните три команды в Remote Admin по одной. Сайт не подключается к серверу.</p><button id="copy-commands" class="button primary">Копировать команды</button></div><div><label for="monitor-yaml">Пресет для конфигурации</label><textarea id="monitor-yaml" rows="6" readonly spellcheck="false"></textarea><p class="hint">Добавьте элемент в существующий список presets конфигурации Monitors. После загрузки конфигурации используйте команду ниже.</p><div class="button-row"><button id="copy-yaml" class="button secondary">Копировать YAML</button><button id="download-preset" class="button secondary">Скачать YAML</button></div></div></div>
+      <label for="preset-command">Применить сохранённый на сервере пресет</label><input id="preset-command" readonly spellcheck="false">
+    </section>
+    <p id="monitor-status" role="status" aria-live="polite"></p>
+  </main>
+  <footer>Atlas HRP · Оригинальная идея Rysik5318 · Scout Trooper</footer>
+</body>
+</html>

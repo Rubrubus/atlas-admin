@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Генератор ключ-карт Atlas HRP. Параметры, уровни доступа, шаблоны и предпросмотр карты.">
+  <title>Генератор ключ-карт | Atlas HRP</title>
+  <link rel="stylesheet" href="monitors.css">
+  <link rel="stylesheet" href="keycards.css">
+  <script defer src="keycards.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <a class="brand" href="index.html">ATLAS <span>HRP / ADMIN TOOLS</span></a>
+    <nav aria-label="Инструменты"><a href="index.html" aria-current="page">Ключ-карты</a><a href="monitors.html">Мониторы</a></nav>
+  </header>
+  <main>
+    <div class="intro"><p class="eyebrow">СИСТЕМА УПРАВЛЕНИЯ ДОСТУПОМ</p><h1>Генератор ключ-карт</h1><p>Настройте карту. Проверьте доступ. Перенесите в игру.</p></div>
+    <section class="panel" aria-labelledby="card-settings-heading">
+      <div class="section-heading"><h2 id="card-settings-heading">Параметры карты</h2><span class="badge">KEYCARDS</span></div>
+      <div class="editor-grid card-editor-grid">
+        <div class="card-fields">
+
+      <div class="form-group">
+        <label class="form-label" for="cardId">PlayerID</label>
+        <input type="text" class="form-input" id="cardId" placeholder="0" value="0">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="keycardName">Имя ключ-карты (в инвентаре)</label>
+        <input type="text" class="form-input" id="keycardName" placeholder="Ключ-карта Логиста"
+          value="Ключ-карта Логиста">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="department">Департамент</label>
+        <input type="text" class="form-input" id="department" placeholder="Департамент" value="LOGISTIC DEPARTMENT"
+          oninput="this.value = this.value.toUpperCase()">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="position">Должность</label>
+        <input type="text" class="form-input" id="position" placeholder="Логист" value="Логист">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="cardType">Тип карты</label>
+        <select class="form-input" id="cardType">
+          <option value="KeycardCustomMetalCase">Карта в металлическом кейсе</option>
+          <option value="KeycardCustomTaskForce">Карта Оперативных Подразделений</option>
+          <option value="KeycardCustomSite02">Карта обычная</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="cardColor">Цвет карты</label>
+        <div class="color-picker">
+          <input type="color" class="color-input" id="cardColor" value="#528198">
+          <div class="color-value" id="colorHex">#528198</div>
+        </div>
+      </div>
+    </div>
+        <aside class="card-access"><h3>Уровни доступа</h3><p class="hint">От 0 до 3 для каждой категории.</p>
+
+      <div class="access-grid">
+        <div class="access-item">
+          <label class="access-label" for="containmentLevel">Содержательный уровень</label>
+          <div class="level-controls">
+            <button class="level-btn" id="minusContainment" aria-label="Уменьшить содержательный уровень">-</button>
+            <input type="number" class="level-input" id="containmentLevel" min="0" max="3" value="0">
+            <button class="level-btn" id="plusContainment" aria-label="Увеличить содержательный уровень">+</button>
+          </div>
+        </div>
+
+        <div class="access-item">
+          <label class="access-label" for="armoryLevel">Оружейный уровень</label>
+          <div class="level-controls">
+            <button class="level-btn" id="minusArmory" aria-label="Уменьшить оружейный уровень">-</button>
+            <input type="number" class="level-input" id="armoryLevel" min="0" max="3" value="0">
+            <button class="level-btn" id="plusArmory" aria-label="Увеличить оружейный уровень">+</button>
+          </div>
+        </div>
+
+        <div class="access-item">
+          <label class="access-label" for="adminLevel">Административный уровень</label>
+          <div class="level-controls">
+            <button class="level-btn" id="minusAdmin" aria-label="Уменьшить административный уровень">-</button>
+            <input type="number" class="level-input" id="adminLevel" min="0" max="3" value="0">
+            <button class="level-btn" id="plusAdmin" aria-label="Увеличить административный уровень">+</button>
+          </div>
+        </div>
+      </div>
+    </aside>
+      </div>
+    </section>
+    <section class="panel" aria-labelledby="card-preview-heading">
+      <div class="section-heading"><h2 id="card-preview-heading">Предпросмотр карты</h2><span class="badge">PREVIEW</span></div>
+      <div class="card-preview-stage"><div class="keycard-preview">
+        <div class="keycard" id="keycardPreview">
+          <div class="keycard-header">
+            <div class="keycard-id" id="previewCardId">0</div>
+            <div class="keycard-type" id="previewCardType">Карта в металлическом кейсе</div>
+          </div>
+
+          <div class="keycard-department" id="previewDepartment">LOGISTIC DEPARTMENT</div>
+          <div class="keycard-position" id="previewPosition">Логист</div>
+
+          <div class="keycard-levels">
+            <div class="level">
+              <div class="level-label">Содержательный</div>
+              <div class="level-value" id="previewContainmentLevel">0</div>
+            </div>
+            <div class="level">
+              <div class="level-label">Оружейный</div>
+              <div class="level-value" id="previewArmoryLevel">0</div>
+            </div>
+            <div class="level">
+              <div class="level-label">Административный</div>
+              <div class="level-value" id="previewAdminLevel">0</div>
+            </div>
+          </div>
+
+          <div class="keycard-footer">
+            <div class="keycard-colors">
+              <div class="color-swatch" id="previewColorSwatch" style="background: #528198;"></div>
+            </div>
+            <div class="keycard-chip"></div>
+          </div>
+        </div>
+      </div>
+
+</div>
+    </section>
+    <section class="panel" aria-labelledby="card-presets-heading">
+      <div class="section-heading"><h2 id="card-presets-heading">Шаблоны карт</h2><span class="badge">PRESETS</span></div>
+      <p class="hint">Выберите должность, чтобы заполнить параметры и уровни доступа.</p>
+      <div class="presets-grid" id="presetsContainer"><div class="presets-loading">Загрузка шаблонов...</div></div>
+    </section>
+    <section class="panel" aria-labelledby="card-result-heading">
+      <div class="section-heading"><h2 id="card-result-heading">Перенести в игру</h2><span class="badge">REMOTE ADMIN</span></div>
+      <label for="result">Команда выдачи карты</label>
+      <textarea id="result" rows="4" readonly spellcheck="false" placeholder="Здесь появится команда выдачи ключ-карты"></textarea>
+      <p class="hint">Выполните команду в Remote Admin. Карта будет выдана игроку с указанным PlayerID.</p>
+      <div class="button-row"><button class="button primary" id="generateBtn">Сгенерировать</button><button class="button secondary" id="copyBtn">Копировать команду</button></div>
+    </section>
+  </main>
+  <footer>Atlas HRP · Оригинальная идея Rysik5318 · Scout Trooper</footer>
+</body>
+</html>

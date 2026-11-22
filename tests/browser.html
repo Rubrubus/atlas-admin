@@ -1,0 +1,56 @@
+<!DOCTYPE html><html lang="ru"><meta charset="UTF-8"><title>Browser smoke tests</title><body><pre id="results">RUNNING</pre><iframe id="page" width="1200" height="900" title="Test page"></iframe><script>
+const results = document.getElementById('results');
+const frame = document.getElementById('page');
+const checks = [];
+function check(condition, message) { if (!condition) throw new Error(message); checks.push('PASS ' + message); }
+function load(url) { return new Promise(resolve => { frame.onload = resolve; frame.src = url; }); }
+function edit(doc, id, value) { const field = doc.getElementById(id); field.value = value; field.dispatchEvent(new Event('input', {bubbles:true})); }
+async function run() {
+  await load('../monitors.html');
+  let doc = frame.contentDocument;
+  const get = id => doc.getElementById(id);
+  check(get('monitor-preset').options.length === 7, 'Six game presets and a custom option');
+  check(get('preview-title').textContent === 'SECURE. CONTAIN. PROTECT.', 'Initial live preview');
+  check(get('monitor-commands').value.startsWith('monitor color DCE6E6'), 'Initial game commands');
+  for (let index = 0; index < 6; index++) {
+    const select = get('monitor-preset'); select.value = String(index); select.dispatchEvent(new Event('change'));
+    check(get('monitor-name').value === frame.contentWindow.MonitorCore.presets[index].Name, 'Preset ' + index);
+  }
+  edit(doc, 'monitor-title', '<b>СРОЧНО</b><br><color=#ff0000>ТЕСТ</color><img src=x onerror="alert(1)">');
+  check(get('preview-title').querySelector('br') && !get('preview-title').querySelector('img'), 'Safe rich text with line breaks');
+  check(get('preview-title').querySelector('span').style.fontWeight === 'bold', 'Bold formatting');
+  edit(doc, 'monitor-hex', 'bad');
+  check(get('copy-commands').disabled && get('monitor-commands').value === '', 'Invalid color blocks export');
+  edit(doc, 'monitor-hex', '#12ab34');
+  edit(doc, 'monitor-title', 'Строка 1\nСтрока 2');
+  get('monitor-target').value = 'globalmonitor'; get('monitor-target').dispatchEvent(new Event('change'));
+  check(get('monitor-commands').value.split('\n').length === 3 && get('monitor-commands').value.includes('globalmonitor title Строка 1<br>Строка 2'), 'Global commands and multiline normalization');
+  edit(doc, 'monitor-name', 'Сохранённый монитор'); get('save-draft').click();
+  await load('../monitors.html?reload=1'); doc = frame.contentDocument;
+  check(get('monitor-name').value === 'Сохранённый монитор', 'Draft restored after reload');
+  get('reset-monitor').click();
+  check(get('monitor-name').value === 'Стандарт', 'Reset restores default');
+  check(!get('scanlines'), 'Screen effect removed');
+  check(!doc.querySelector('.preview-note'), 'Monitor caption removed');
+  check(!doc.body.textContent.includes('СИСТЕМА ОПОВЕЩЕНИЯ УЧРЕЖДЕНИЯ'), 'Monitor eyebrow removed');
+  frame.style.width = '360px';
+  check(doc.documentElement.scrollWidth <= frame.clientWidth, 'Mobile page has no horizontal overflow');
+  await load('../index.html'); doc = frame.contentDocument;
+  check(doc.querySelector('a[href="monitors.html"]') && get('keycardPreview'), 'Card editor and monitor navigation preserved');
+  get('generateBtn').click(); check(get('result').value.length > 0, 'Original card command generator works');
+  check(doc.querySelector('.page-header nav a[aria-current="page"]').textContent === 'Ключ-карты', 'Shared header marks cards active');
+  check(doc.documentElement.scrollWidth <= frame.clientWidth, 'Card editor fits mobile width');
+  check(doc.querySelectorAll('button.preset-item').length === 11, 'All card presets available with keyboard access');
+  doc.querySelector('button.preset-item').click();
+  check(get('keycardName').value === 'Ключ-Карта Директора' && get('previewContainmentLevel').textContent === '3', 'Preset updates fields and preview');
+  get('minusContainment').click();
+  check(get('containmentLevel').value === '2' && get('previewContainmentLevel').textContent === '2', 'Access control updates preview');
+  edit(doc, 'cardId', '42'); edit(doc, 'cardColor', '#123456');
+  check(get('result').value.endsWith('42') && get('result').value.includes('#123456'), 'Card command updates player and color');
+  check(get('keycardPreview').style.getPropertyValue('--card-accent') === '#123456', 'Preview uses chosen card color');
+  check(!doc.querySelector('.card-preview-note'), 'Card caption removed');
+  check(!doc.body.textContent.includes('На основе AtlasCardsAdmin'), 'Footer attribution removed');
+  results.textContent = checks.join('\n') + '\nALL PASSED';
+}
+run().catch(error => { results.textContent = checks.join('\n') + '\nFAILED: ' + error.stack; });
+</script></body></html>
