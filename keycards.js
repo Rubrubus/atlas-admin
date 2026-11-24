@@ -144,6 +144,7 @@ const containmentLevel = document.getElementById('containmentLevel');
 const armoryLevel = document.getElementById('armoryLevel');
 const adminLevel = document.getElementById('adminLevel');
 const keycardPreview = document.getElementById('keycardPreview');
+const keycardArt = document.getElementById('keycardArt');
 const result = document.getElementById('result');
 const copyButton = document.getElementById('copyBtn');
 const presetsContainer = document.getElementById('presetsContainer');
@@ -169,13 +170,21 @@ function updateCard() {
   validateLevel(containmentLevel);
   validateLevel(armoryLevel);
   validateLevel(adminLevel);
-  document.getElementById('previewCardId').textContent = cardId.value || '0';
-  document.getElementById('previewDepartment').textContent = department.value || 'LOGISTIC DEPARTMENT';
+  keycardPreview.dataset.cardType = cardType.value;
+  keycardArt.src = cardType.value === 'KeycardCustomMetalCase'
+    ? 'assets/keycard-metal-case.png'
+    : 'assets/keycard-standard.png';
+  document.getElementById('previewDepartment').textContent = department.value || 'Департамент';
   document.getElementById('previewPosition').textContent = position.value || 'Должность';
-  document.getElementById('previewCardType').textContent = cardType.options[cardType.selectedIndex].text;
-  document.getElementById('previewContainmentLevel').textContent = containmentLevel.value;
-  document.getElementById('previewArmoryLevel').textContent = armoryLevel.value;
-  document.getElementById('previewAdminLevel').textContent = adminLevel.value;
+  for (const slot of keycardPreview.querySelectorAll('.access-slot')) {
+    const level = Number(slot.dataset.level);
+    const accessLevel = {
+      admin: Number(adminLevel.value),
+      armory: Number(armoryLevel.value),
+      containment: Number(containmentLevel.value)
+    }[slot.dataset.access];
+    slot.dataset.active = String(accessLevel >= level);
+  }
   document.getElementById('previewColorSwatch').style.background = cardColor.value;
   document.getElementById('colorHex').textContent = cardColor.value;
   keycardPreview.style.setProperty('--card-accent', cardColor.value);
@@ -200,7 +209,7 @@ function applyCardPreset(preset) {
   if (!author) {
     author = document.createElement('div');
     author.className = 'keycard-author';
-    keycardPreview.appendChild(author);
+    keycardPreview.parentElement.appendChild(author);
   }
   author.textContent = 'Шаблон: ' + preset.author;
   updateCard();

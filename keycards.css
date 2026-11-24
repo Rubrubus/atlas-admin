@@ -1,4 +1,31 @@
 /* Page-specific components share the editor shell and controls with monitors.css. */
+:root {
+  /* Fill coordinates and sizes are percentages of each card image. */
+  --standard-admin-1-left: 34.7%;
+  --standard-admin-2-left: 18.4%;
+  --standard-admin-3-left: 2.6%;
+  --standard-admin-top: 32.4%;
+  --standard-armory-top: 56.5%;
+  --standard-containment-top: 80.3%;
+  --standard-fill-width: 12%;
+  --standard-fill-height: 16.6%;
+
+/* Metal case card has a different layout, so we need separate variables for it. */
+  
+  --metal-admin-1-left: 40.3%;
+  --metal-admin-2-left: 25.7%;
+  --metal-admin-3-left: 11.6%;
+  --metal-admin-top: 34.1%;
+  --metal-armory-top: 55.6%;
+  --metal-containment-top: 77.6%;
+  --metal-fill-width: 10.5%;
+  --metal-fill-height: 14.5%;
+  --metal-band-left: 9.5%;
+  --metal-band-right: 2%;
+  --metal-band-top: 12.6%;
+  --metal-band-height: 16.8%;
+}
+
 .card-fields {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -92,108 +119,227 @@
 }
 
 .keycard-preview {
-  max-width: 640px;
+  max-width: 760px;
   margin: auto;
 }
 
 .keycard {
   --card-accent: #528198;
   position: relative;
+  width: 100%;
+  aspect-ratio: 1.53;
   overflow: hidden;
-  padding: 28px;
-  border: 1px solid color-mix(in srgb, var(--card-accent) 55%, #30303e);
-  border-top: 6px solid var(--card-accent);
-  border-radius: 14px;
-  background: linear-gradient(135deg, #232936, #131720 65%);
-  box-shadow: 0 18px 35px #0005;
+  color: #24242a;
 }
 
-.keycard-header {
+.keycard-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: fill;
+}
+
+.keycard-color-band {
+  position: absolute;
+  z-index: 1;
+  top: 10%;
+  left: 0;
+  width: 100%;
+  height: 19%;
+  overflow: hidden;
+  background: var(--card-accent);
+}
+
+.keycard-text-lines {
+  position: absolute;
+  z-index: 2;
+  top: 13%;
+  left: 8%;
+  right: 8%;
+  height: 14%;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
+  flex-direction: column;
+  justify-content: space-around;
+  overflow: hidden;
+  color: #fff;
+  text-align: left;
+  text-shadow: 0 1px 2px #000a;
 }
 
-.keycard-id {
-  padding: 5px 14px;
-  border: 1px solid #ffffff25;
-  border-radius: 6px;
-  background: #ffffff08;
-  font: 15px/1.5 Consolas, monospace;
-  overflow-wrap: anywhere;
-  min-width: 0;
-}
-
-.keycard-type {
-  font-size: 14px;
-  text-align: right;
-  color: #b9becb;
-}
-
+.keycard-position,
 .keycard-department {
-  margin-bottom: 6px;
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: 1px;
-  color: #e1e7ef;
-  overflow-wrap: anywhere;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .keycard-position {
-  margin-bottom: 24px;
-  font-size: 22px;
-  font-weight: 600;
-  overflow-wrap: anywhere;
-}
-
-.keycard-levels {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0,1fr));
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.level {
-  border: 1px solid #ffffff15;
-  border-radius: 8px;
-  padding: 12px 8px;
-  text-align: center;
-  background: #06091166;
-}
-
-.level-label {
-  font-size: 13px;
-  color: #b9becb;
-  overflow-wrap: anywhere;
-}
-
-.level-value {
-  margin-top: 4px;
-  font-size: 24px;
+  font-size: clamp(10px, 1.8vw, 17px);
   font-weight: 700;
+  line-height: 1;
 }
 
-.keycard-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
+.keycard-department {
+  font-size: clamp(8px, 1.3vw, 12px);
+  font-weight: 600;
+  line-height: 1;
 }
 
-.color-swatch {
-  width: 50px;
-  height: 12px;
+.keycard-access-grid {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+}
+
+.access-slot {
+  position: absolute;
+  width: var(--standard-fill-width);
+  height: var(--standard-fill-height);
+  border-radius: 8%;
+}
+
+.access-slot::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.access-slot[data-active="true"]::before {
+  background: var(--card-accent);
+}
+
+.access-slot[data-level="1"] {
+  left: var(--standard-admin-1-left);
+}
+
+.access-slot[data-level="2"] {
+  left: var(--standard-admin-2-left);
+}
+
+.access-slot[data-level="3"] {
+  left: var(--standard-admin-3-left);
+}
+
+.access-slot[data-access="admin"] {
+  top: var(--standard-admin-top);
+}
+
+.access-slot[data-access="armory"] {
+  top: var(--standard-armory-top);
+}
+
+.access-slot[data-access="containment"] {
+  top: var(--standard-containment-top);
+}
+
+.access-slot[data-access="admin"][data-level="1"] {
+  left: calc(var(--standard-admin-1-left) + 0.1%);
+  top: calc(var(--standard-admin-top) - 0.2%);
+}
+
+.access-slot[data-access="armory"][data-level="1"],
+.access-slot[data-access="containment"][data-level="1"] {
+  left: calc(var(--standard-admin-1-left) + 0.3%);
+}
+
+.access-slot[data-access="armory"][data-level="1"] {
+  top: calc(var(--standard-armory-top) - 0.2%);
+}
+
+.access-slot[data-access="containment"][data-level="1"] {
+  top: calc(var(--standard-containment-top) - 0.2%);
+}
+
+.keycard-color-mark {
+  position: absolute;
+  z-index: 2;
+  bottom: 3.5%;
+  left: 4%;
+  width: 8%;
+  height: 3%;
   border-radius: 3px;
+  display: none;
 }
 
-.keycard-chip {
-  width: 42px;
-  height: 30px;
-  border-radius: 5px;
-  border: 1px solid #d3caa6;
-  background: linear-gradient(135deg, #b1a47b, #dfd5b6 45%, #a99b70);
+.keycard[data-card-type="KeycardCustomMetalCase"] {
+  aspect-ratio: 1.566;
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .keycard-color-mark {
+  display: block;
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .keycard-color-band {
+  top: var(--metal-band-top);
+  left: var(--metal-band-left);
+  right: var(--metal-band-right);
+  width: auto;
+  height: var(--metal-band-height);
+  background: color-mix(in srgb, var(--card-accent) 70%, #626262);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .keycard-text-lines {
+  top: 15%;
+  left: 17%;
+  right: 25%;
+  height: 12%;
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .keycard-access-grid {
+  inset: 0;
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot {
+  width: var(--metal-fill-width);
+  height: var(--metal-fill-height);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-level="1"] {
+  left: var(--metal-admin-1-left);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-level="2"] {
+  left: var(--metal-admin-2-left);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-level="3"] {
+  left: var(--metal-admin-3-left);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="admin"] {
+  top: var(--metal-admin-top);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="armory"] {
+  top: var(--metal-armory-top);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="containment"] {
+  top: var(--metal-containment-top);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="admin"][data-level="1"] {
+  left: calc(var(--metal-admin-1-left) + 0.1%);
+  top: calc(var(--metal-admin-top) - 0.2%);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="armory"][data-level="1"],
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="containment"][data-level="1"] {
+  left: calc(var(--metal-admin-1-left) + 0.3%);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="armory"][data-level="1"] {
+  top: calc(var(--metal-armory-top) - 0.2%);
+}
+
+.keycard[data-card-type="KeycardCustomMetalCase"] .access-slot[data-access="containment"][data-level="1"] {
+  top: calc(var(--metal-containment-top) - 0.2%);
 }
 
 .keycard-author {
@@ -276,23 +422,10 @@
   .card-preview-stage {
     padding: 20px 8px;
   }
-  .keycard {
-    padding: 18px 12px;
+  .keycard-position {
+    font-size: clamp(9px, 2vw, 12px);
   }
-  .keycard-header {
-    gap: 10px;
-  }
-  .keycard-type {
-    font-size: 13px;
-  }
-  .keycard-levels {
-    gap: 6px;
-  }
-  .level {
-    padding: 10px 3px;
-  }
-  .level-label {
-    font-size: 12px;
+  .keycard-department {
+    font-size: clamp(7px, 1.5vw, 10px);
   }
 }
-

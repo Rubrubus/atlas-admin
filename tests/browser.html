@@ -1,10 +1,11 @@
-<!DOCTYPE html><html lang="ru"><meta charset="UTF-8"><title>Browser smoke tests</title><body><pre id="results">RUNNING</pre><iframe id="page" width="1200" height="900" title="Test page"></iframe><script>
+<!DOCTYPE html><html lang="ru"><meta charset="UTF-8"><title>Browser smoke tests</title><style>html,body{width:100%;height:100%;margin:0;overflow:hidden}#page{position:fixed;inset:0;display:block;width:100vw;height:100vh;border:0}#results{position:fixed;z-index:2;top:8px;left:8px;max-width:calc(100vw - 32px);max-height:35vh;overflow:auto;margin:0;padding:8px 12px;border:1px solid #444;border-radius:6px;background:#111e;color:#fff;font:12px/1.4 Consolas,monospace}body.tests-passed #results{display:none}</style><body><pre id="results">RUNNING</pre><iframe id="page" title="Test page"></iframe><script>
 const results = document.getElementById('results');
 const frame = document.getElementById('page');
 const checks = [];
 function check(condition, message) { if (!condition) throw new Error(message); checks.push('PASS ' + message); }
 function load(url) { return new Promise(resolve => { frame.onload = resolve; frame.src = url; }); }
 function edit(doc, id, value) { const field = doc.getElementById(id); field.value = value; field.dispatchEvent(new Event('input', {bubbles:true})); }
+function cssPercent(doc, name) { return parseFloat(doc.defaultView.getComputedStyle(doc.documentElement).getPropertyValue(name)); }
 async function run() {
   await load('../monitors.html');
   let doc = frame.contentDocument;
@@ -40,17 +41,83 @@ async function run() {
   get('generateBtn').click(); check(get('result').value.length > 0, 'Original card command generator works');
   check(doc.querySelector('.page-header nav a[aria-current="page"]').textContent === 'Ключ-карты', 'Shared header marks cards active');
   check(doc.documentElement.scrollWidth <= frame.clientWidth, 'Card editor fits mobile width');
+  frame.style.width = '';
   check(doc.querySelectorAll('button.preset-item').length === 11, 'All card presets available with keyboard access');
+  check(get('keycardPreview').dataset.cardType === 'KeycardCustomMetalCase', 'Card type is reflected in the live preview');
+  check(get('keycardArt').getAttribute('src') === 'assets/keycard-metal-case.png', 'Metal-case artwork is used in the preview');
+  check(!get('keycardPreview').querySelector('.keycard-id, .keycard-type'), 'Card ID and type stay off the card face');
   doc.querySelector('button.preset-item').click();
-  check(get('keycardName').value === 'Ключ-Карта Директора' && get('previewContainmentLevel').textContent === '3', 'Preset updates fields and preview');
+  check(get('keycardName').value === 'Ключ-Карта Директора' && get('containmentLevel').value === '3', 'Preset updates fields and preview');
+  check(get('previewPosition').textContent === 'Директор Участка-07' && get('previewDepartment').textContent === 'ADMINISTATIVE_DEPARTAMENT', 'Position and department are displayed on the card');
+  check([...get('keycardPreview').querySelectorAll('.access-slot')].every(slot => slot.dataset.active === 'true' && !slot.textContent.trim()), 'Maximum access levels fill all matching squares without numbers');
+  const activeSlot = get('keycardPreview').querySelector('.access-slot[data-active="true"]');
+  const activeFill = doc.defaultView.getComputedStyle(activeSlot, '::before');
+  const activeSlotBox = activeSlot.getBoundingClientRect();
+  check(activeFill.borderRadius === '50%'
+    && Math.abs(parseFloat(activeFill.width) - activeSlotBox.width * 0.9) < 1
+    && Math.abs(parseFloat(activeFill.height) - activeSlotBox.height) < 1
+    && Math.abs(parseFloat(activeFill.width) - parseFloat(activeFill.height)) < 2,
+  'Active access fills are circular and fit inside their outline');
+  check(doc.defaultView.getComputedStyle(get('previewPosition')).textAlign === 'left' && doc.defaultView.getComputedStyle(get('previewDepartment')).textAlign === 'left', 'Position and department are left-aligned');
+  get('cardType').value = 'KeycardCustomSite02'; get('cardType').dispatchEvent(new Event('change'));
+  check(get('keycardPreview').dataset.cardType === 'KeycardCustomSite02' && get('keycardArt').getAttribute('src') === 'assets/keycard-standard.png', 'Standard card uses its provided artwork');
+  check(doc.defaultView.getComputedStyle(doc.querySelector('.keycard-color-band')).display !== 'none', 'Standard card color band is live');
+  check(doc.documentElement.scrollWidth <= frame.clientWidth, 'Standard card fits mobile width');
+  get('cardType').value = 'KeycardCustomTaskForce'; get('cardType').dispatchEvent(new Event('change'));
+  check(get('keycardPreview').dataset.cardType === 'KeycardCustomTaskForce' && get('keycardArt').getAttribute('src') === 'assets/keycard-standard.png', 'Task-force cards use the interactive card preview');
+  edit(doc, 'containmentLevel', '1');
+  const slots = [...get('keycardPreview').querySelectorAll('.access-slot')];
+  const containmentSlots = slots.filter(slot => slot.dataset.access === 'containment');
+  check(containmentSlots.find(slot => slot.dataset.level === '1').dataset.active === 'true'
+    && containmentSlots.filter(slot => slot.dataset.level !== '1').every(slot => slot.dataset.active === 'false'), 'Level one fills only the rightmost access square');
+  const firstSlot = containmentSlots.find(slot => slot.dataset.level === '1').getBoundingClientRect();
+  const secondSlot = containmentSlots.find(slot => slot.dataset.level === '2').getBoundingClientRect();
+  check(firstSlot.top < secondSlot.top && firstSlot.left > secondSlot.left, 'First access level is slightly higher and levels progress right to left');
+  check(containmentSlots.every(slot => {
+    const box = slot.getBoundingClientRect();
+    const card = get('keycardPreview').getBoundingClientRect();
+    const level = slot.dataset.level;
+    const levelOneOffset = level === '1' ? (slot.dataset.access === 'admin' ? 0.1 : 0.3) : 0;
+    const topOffset = level === '1' ? -0.2 : 0;
+    return Math.abs(box.left - card.left - card.width * (cssPercent(doc, `--standard-admin-${level}-left`) + levelOneOffset) / 100) < 1
+      && Math.abs(box.top - card.top - card.height * (cssPercent(doc, '--standard-containment-top') + topOffset) / 100) < 1
+      && Math.abs(box.width - card.width * cssPercent(doc, '--standard-fill-width') / 100) < 1
+      && Math.abs(box.height - card.height * cssPercent(doc, '--standard-fill-height') / 100) < 1;
+  }), 'Standard card fills follow editable CSS coordinates and sizes');
+  edit(doc, 'armoryLevel', '2');
+  check(slots.filter(slot => slot.dataset.access === 'armory').filter(slot => slot.dataset.active === 'true').length === 2, 'Level two fills the two rightmost armory squares');
+  get('cardType').value = 'KeycardCustomMetalCase'; get('cardType').dispatchEvent(new Event('change'));
+  check(get('keycardArt').getAttribute('src') === 'assets/keycard-metal-case.png' && doc.defaultView.getComputedStyle(doc.querySelector('.keycard-color-band')).display !== 'none', 'Metal-case artwork returns when selected');
+  const metalBand = doc.querySelector('.keycard-color-band').getBoundingClientRect();
+  const metalCard = get('keycardPreview').getBoundingClientRect();
+  check(metalBand.left > metalCard.left && metalBand.right < metalCard.right, 'Metal-case color band stays inside the metal frame');
+  check(Math.abs(metalBand.left - metalCard.left - metalCard.width * cssPercent(doc, '--metal-band-left') / 100) < 1
+    && Math.abs(metalBand.right - metalCard.right + metalCard.width * cssPercent(doc, '--metal-band-right') / 100) < 1
+    && Math.abs(metalBand.top - metalCard.top - metalCard.height * cssPercent(doc, '--metal-band-top') / 100) < 1
+    && Math.abs(metalBand.height - metalCard.height * cssPercent(doc, '--metal-band-height') / 100) < 1,
+  'Metal-case band follows editable CSS coordinates and size');
+  check([...get('keycardPreview').querySelectorAll('.access-slot')].every(slot => {
+    const box = slot.getBoundingClientRect();
+    const level = slot.dataset.level;
+    const access = slot.dataset.access;
+    const levelOneOffset = level === '1' ? (access === 'admin' ? 0.1 : 0.3) : 0;
+    const topOffset = level === '1' ? -0.2 : 0;
+    return Math.abs(box.left - metalCard.left - metalCard.width * (cssPercent(doc, `--metal-admin-${level}-left`) + levelOneOffset) / 100) < 1
+      && Math.abs(box.top - metalCard.top - metalCard.height * (cssPercent(doc, `--metal-${access}-top`) + topOffset) / 100) < 1
+      && Math.abs(box.width - metalCard.width * cssPercent(doc, '--metal-fill-width') / 100) < 1
+      && Math.abs(box.height - metalCard.height * cssPercent(doc, '--metal-fill-height') / 100) < 1;
+  }), 'Metal-case fills follow editable CSS coordinates and sizes');
+  edit(doc, 'containmentLevel', '3');
   get('minusContainment').click();
-  check(get('containmentLevel').value === '2' && get('previewContainmentLevel').textContent === '2', 'Access control updates preview');
+  check(get('containmentLevel').value === '2' && containmentSlots.filter(slot => slot.dataset.active === 'true').length === 2, 'Access control updates preview');
   edit(doc, 'cardId', '42'); edit(doc, 'cardColor', '#123456');
   check(get('result').value.endsWith('42') && get('result').value.includes('#123456'), 'Card command updates player and color');
   check(get('keycardPreview').style.getPropertyValue('--card-accent') === '#123456', 'Preview uses chosen card color');
   check(!doc.querySelector('.card-preview-note'), 'Card caption removed');
   check(!doc.body.textContent.includes('На основе AtlasCardsAdmin'), 'Footer attribution removed');
   results.textContent = checks.join('\n') + '\nALL PASSED';
+  await load('../index.html?test-complete=1');
+  document.body.classList.add('tests-passed');
 }
 run().catch(error => { results.textContent = checks.join('\n') + '\nFAILED: ' + error.stack; });
 </script></body></html>

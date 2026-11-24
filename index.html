@@ -97,35 +97,24 @@
       <div class="section-heading"><h2 id="card-preview-heading">Предпросмотр карты</h2><span class="badge">PREVIEW</span></div>
       <div class="card-preview-stage"><div class="keycard-preview">
         <div class="keycard" id="keycardPreview">
-          <div class="keycard-header">
-            <div class="keycard-id" id="previewCardId">0</div>
-            <div class="keycard-type" id="previewCardType">Карта в металлическом кейсе</div>
+          <img class="keycard-art" id="keycardArt" src="assets/keycard-metal-case.png" alt="">
+          <div class="keycard-color-band" aria-hidden="true"></div>
+          <div class="keycard-text-lines">
+            <div class="keycard-position" id="previewPosition">Должность</div>
+            <div class="keycard-department" id="previewDepartment">Департамент</div>
           </div>
-
-          <div class="keycard-department" id="previewDepartment">LOGISTIC DEPARTMENT</div>
-          <div class="keycard-position" id="previewPosition">Логист</div>
-
-          <div class="keycard-levels">
-            <div class="level">
-              <div class="level-label">Содержательный</div>
-              <div class="level-value" id="previewContainmentLevel">0</div>
-            </div>
-            <div class="level">
-              <div class="level-label">Оружейный</div>
-              <div class="level-value" id="previewArmoryLevel">0</div>
-            </div>
-            <div class="level">
-              <div class="level-label">Административный</div>
-              <div class="level-value" id="previewAdminLevel">0</div>
-            </div>
+          <div class="keycard-access-grid" aria-label="Уровни доступа">
+            <span class="access-slot" data-access="admin" data-level="1"></span>
+            <span class="access-slot" data-access="admin" data-level="2"></span>
+            <span class="access-slot" data-access="admin" data-level="3"></span>
+            <span class="access-slot" data-access="armory" data-level="1"></span>
+            <span class="access-slot" data-access="armory" data-level="2"></span>
+            <span class="access-slot" data-access="armory" data-level="3"></span>
+            <span class="access-slot" data-access="containment" data-level="1"></span>
+            <span class="access-slot" data-access="containment" data-level="2"></span>
+            <span class="access-slot" data-access="containment" data-level="3"></span>
           </div>
-
-          <div class="keycard-footer">
-            <div class="keycard-colors">
-              <div class="color-swatch" id="previewColorSwatch" style="background: #528198;"></div>
-            </div>
-            <div class="keycard-chip"></div>
-          </div>
+          <div class="keycard-color-mark" id="previewColorSwatch"></div>
         </div>
       </div>
 
